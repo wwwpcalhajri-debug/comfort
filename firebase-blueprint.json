@@ -1,0 +1,98 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "A service or item available for purchase",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "originalPrice": { "type": "number" },
+        "category": { "type": "string", "enum": ["clean", "delivery"] },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["name", "price", "category"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "A customer order",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/entities/Product" }
+        },
+        "totalAmount": { "type": "number" },
+        "paymentMethod": { "type": "string" },
+        "installmentDuration": { "type": "number" },
+        "weeklyPayment": { "type": "number" },
+        "receiptFile": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["userId", "customerName", "customerPhone", "items", "totalAmount", "paymentMethod", "status"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Admin users who entered the passcode",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["uid"]
+    },
+    "Feedback": {
+      "title": "Feedback",
+      "description": "User feedback and rating",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "rating": { "type": "number" },
+        "feedbackText": { "type": "string" },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["userId", "rating", "createdAt"]
+    },
+    "Coupon": {
+      "title": "Coupon",
+      "description": "Discount coupon",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "discountAmount": { "type": "number" },
+        "isActive": { "type": "boolean" },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["code", "discountAmount", "isActive", "createdAt"]
+    }
+  },
+  "firestore": {
+    "products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Collection of products/services"
+    },
+    "orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Collection of customer orders"
+    },
+    "admins/{adminId}": {
+      "schema": { "$ref": "#/entities/Admin" },
+      "description": "Collection of admin users"
+    },
+    "feedback/{feedbackId}": {
+      "schema": { "$ref": "#/entities/Feedback" },
+      "description": "Collection of user feedback"
+    },
+    "coupons/{couponCode}": {
+      "schema": { "$ref": "#/entities/Coupon" },
+      "description": "Collection of discount coupons"
+    }
+  }
+}

@@ -1,0 +1,87 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: products
+    // Document ID: auto-generated
+    // Fields:
+    //   - name: string (required)
+    //   - description: string (optional)
+    //   - price: number (required)
+    //   - originalPrice: number (optional)
+    //   - category: string (required, 'clean' or 'delivery')
+    //   - createdAt: timestamp
+    //
+    // Collection: orders
+    // Document ID: auto-generated
+    // Fields:
+    //   - userId: string (required)
+    //   - customerName: string (required)
+    //   - customerPhone: string (required)
+    //   - items: array (required)
+    //   - totalAmount: number (required)
+    //   - paymentMethod: string (required)
+    //   - installmentDuration: number (optional)
+    //   - weeklyPayment: number (optional)
+    //   - status: string (required, 'pending', 'approved', 'rejected')
+    //   - createdAt: timestamp
+    //
+    // Collection: admins
+    // Document ID: user UID
+    // Fields:
+    //   - uid: string (required)
+    //   - createdAt: timestamp
+    //
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        request.auth.token.phone_number == "+966553538409"
+      );
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    match /products/{productId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    match /orders/{orderId} {
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow read: if isAuthenticated() && (isOwner(resource.data.userId) || isAdmin());
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    match /admins/{adminId} {
+      allow read: if isAuthenticated();
+      // Allow authenticated users to register as admin (client-side passcode check)
+      allow create: if isAuthenticated() && request.auth.uid == adminId;
+      allow update, delete: if isAdmin();
+    }
+    
+    match /feedback/{feedbackId} {
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow read: if isAdmin();
+      allow update, delete: if isAdmin();
+    }
+    
+    match /coupons/{couponCode} {
+      allow get: if isAuthenticated();
+      allow list: if isAdmin();
+      allow write: if isAdmin();
+    }
+  }
+}

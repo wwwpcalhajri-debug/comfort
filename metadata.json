@@ -1,0 +1,5 @@
+{
+  "name": "راحة",
+  "description": "تطبيق لخدمات التنظيف والتوصيل مع نظام طلبات ودفع وتقسيط ولوحة تحكم للمالك.",
+  "requestFramePermissions": ["notifications"]
+}
